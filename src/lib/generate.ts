@@ -49,7 +49,9 @@ export function buildSystemPrompt(brand: Brand): string {
 - Pas de titre markdown, pas de gras, pas de liste à puces sauf si la plateforme s'y prête vraiment.
 - N'écris jamais de méta-commentaire (« Voici votre post », « J'espère que… »). Tu produis uniquement le contenu publiable.
 - Respecte scrupuleusement les interdits de la marque listés dans les consignes éditoriales.
-- Le champ \`content\` ne contient pas les hashtags : ils vont dans \`hashtags\`.`,
+- Le champ \`content\` ne contient pas les hashtags : ils vont dans \`hashtags\`.
+- N'invente pas de hashtag de marque. Tu peux utiliser le nom de la marque exactement tel qu'il est écrit ci-dessus ; ne fabrique aucune variante ni mot-valise (pas de nom accolé à un autre mot).
+- Les consignes éditoriales de la marque priment sur les consignes de format génériques de la plateforme. En cas de contradiction (longueur, nombre de hashtags, emojis, tutoiement), applique celles de la marque.`,
   ];
 
   return sections.filter(Boolean).join("\n\n");
