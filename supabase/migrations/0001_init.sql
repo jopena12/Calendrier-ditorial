@@ -66,6 +66,7 @@ create index if not exists topics_brand_idx on topics (brand_id);
 create or replace function set_updated_at()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
   new.updated_at = now();

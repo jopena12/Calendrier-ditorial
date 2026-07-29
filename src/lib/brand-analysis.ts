@@ -1,4 +1,4 @@
-import { callClaudeJson } from "./anthropic";
+import { MODELS, callClaudeJson } from "./anthropic";
 import { formatScrapedPages, scrapeSite } from "./scrape";
 import type { OnboardingAnswers } from "./types";
 
@@ -124,6 +124,7 @@ Cette fiche servira de contexte permanent pour rédiger tous les futurs posts de
     editorial_guidelines: string;
     gaps: string[];
   }>({
+    model: MODELS.analysis,
     system: SYSTEM,
     prompt,
     schema: BRAND_PROFILE_SCHEMA as unknown as Record<string, unknown>,

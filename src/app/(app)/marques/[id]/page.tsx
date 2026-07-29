@@ -6,6 +6,9 @@ import { BrandIdentityForm } from "./identity-form";
 import { BrandOnboarding } from "./onboarding";
 import type { Brand, BrandPlatform, Platform } from "@/lib/types";
 
+// L'analyse de marque scrape le site puis appelle Claude : jusqu'à ~60 s.
+export const maxDuration = 300;
+
 export default async function BrandPage({
   params,
 }: {

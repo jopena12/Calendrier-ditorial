@@ -8,6 +8,9 @@ import { RegenerateForm } from "./regenerate-form";
 import { deletePost } from "@/app/actions/posts";
 import type { PostWithRelations } from "@/lib/types";
 
+// La régénération d'un post appelle Claude : jusqu'à ~60 s.
+export const maxDuration = 300;
+
 export default async function PostPage({
   params,
 }: {

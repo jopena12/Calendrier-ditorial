@@ -239,7 +239,7 @@ export default async function CalendarPage({
         </h2>
         {unscheduled.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">
-            Tous les posts générés ont une date.{" "}
+            Aucun post en attente de date.{" "}
             <Link href="/sujets/nouveau" className="text-indigo-600 underline">
               Créer un sujet
             </Link>

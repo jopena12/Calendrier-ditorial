@@ -3,6 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { NewTopicForm } from "./new-topic-form";
 import type { Brand, BrandPlatform, Platform } from "@/lib/types";
 
+// La génération lance un appel Claude par réseau coché : jusqu'à ~90 s.
+// Sans ça, l'hébergeur coupe la Server Action (10 s par défaut sur Vercel Hobby).
+export const maxDuration = 300;
+
 export default async function NewTopicPage({
   searchParams,
 }: {

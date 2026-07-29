@@ -1,4 +1,4 @@
-import { callClaudeJson } from "./anthropic";
+import { MODELS, callClaudeJson } from "./anthropic";
 import { PLATFORM_META } from "./platforms";
 import type { Brand, Platform, Topic } from "./types";
 
@@ -96,6 +96,7 @@ export async function generatePostForPlatform(
     : buildUserPrompt(topic, platform);
 
   const result = await callClaudeJson<GeneratedPost>({
+    model: MODELS.posts,
     system: buildSystemPrompt(brand),
     prompt,
     schema: POST_SCHEMA as unknown as Record<string, unknown>,

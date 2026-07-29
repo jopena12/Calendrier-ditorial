@@ -11,7 +11,8 @@ Marques prévues : Studio By KM, Bornia, KMI Group, Vumos.
 
 - **Next.js 16** (App Router, Server Components, Server Actions) + Tailwind CSS 4
 - **Supabase** — Postgres + Auth (un seul compte admin), RLS activée
-- **API Anthropic** (`claude-opus-5`) — appelée uniquement côté serveur
+- **API Anthropic** — appelée uniquement côté serveur : Sonnet 5 pour les posts,
+  Opus 5 pour l'analyse de marque (voir « Coût de l'API » plus bas)
 
 La clé Anthropic n'est jamais exposée au client : toute génération passe par des
 Server Actions (`src/app/actions/`).
@@ -55,6 +56,8 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | idem (clé publique / anon) |
 | `ANTHROPIC_API_KEY` | console.anthropic.com — **serveur uniquement** |
+| `ANTHROPIC_MODEL_POSTS` | *optionnel*, défaut `claude-sonnet-5` |
+| `ANTHROPIC_MODEL_ANALYSIS` | *optionnel*, défaut `claude-opus-5` |
 
 ### 4. Lancer
 
@@ -133,6 +136,31 @@ src/
   proxy.ts              rafraîchissement de session + garde d'authentification
 supabase/migrations/    schéma SQL
 ```
+
+## Coût de l'API
+
+Deux modèles, choisis par usage (`src/lib/anthropic.ts`) :
+
+| Usage | Modèle par défaut | Pourquoi |
+| --- | --- | --- |
+| Génération des posts | `claude-sonnet-5` | C'est le volume. Excellent copywriting court dès que le brief et la fiche de marque sont précis, à ~40 % du prix d'Opus. |
+| Analyse de marque | `claude-opus-5` | Une fois par marque. C'est le texte dont dépend la qualité de tous les posts suivants : on ne rogne pas dessus. |
+
+Ordre de grandeur par appel (entrée = fiche de marque + brief ≈ 3 k tokens,
+sortie ≈ 2 k tokens en comptant le raisonnement) :
+
+| | Un post | Un sujet sur 4 réseaux | 20 sujets / mois |
+| --- | --- | --- | --- |
+| Sonnet 5 | ~0,02 € | ~0,10 € | **~2 €** |
+| Opus 5 | ~0,06 € | ~0,25 € | ~5 € |
+
+L'analyse d'une marque coûte ~0,10 € et n'est relancée qu'en cas de changement
+d'offre. Autrement dit : l'enjeu financier est faible dans les deux cas, Sonnet
+divise simplement la facture par deux sans perte visible sur ce type de contenu.
+
+Pour tout passer en Opus : `ANTHROPIC_MODEL_POSTS=claude-opus-5`.
+Haiku n'est pas recommandé ici — l'économie se compte en centimes et la qualité
+rédactionnelle baisse nettement.
 
 ## Notes techniques
 

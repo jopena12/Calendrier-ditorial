@@ -1,7 +1,23 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { anthropicApiKey } from "./env";
 
-export const MODEL = "claude-opus-5";
+/**
+ * Deux usages, deux besoins :
+ *
+ * - `posts` : c'est le volume (un appel par réseau, plusieurs fois par semaine).
+ *   Sonnet 5 fait de l'excellent copywriting court quand le brief et la fiche
+ *   de marque sont précis, pour environ 40 % du coût d'Opus.
+ * - `analysis` : l'onboarding d'une marque n'arrive qu'une fois (puis à chaque
+ *   changement d'offre). C'est le texte dont dépend la qualité de TOUS les posts
+ *   suivants, donc on ne rogne pas : Opus 5.
+ *
+ * Surchargeable sans toucher au code via ANTHROPIC_MODEL_POSTS /
+ * ANTHROPIC_MODEL_ANALYSIS (ex. tout passer en claude-opus-5).
+ */
+export const MODELS = {
+  posts: process.env.ANTHROPIC_MODEL_POSTS ?? "claude-sonnet-5",
+  analysis: process.env.ANTHROPIC_MODEL_ANALYSIS ?? "claude-opus-5",
+} as const;
 
 let client: Anthropic | null = null;
 
@@ -15,6 +31,7 @@ export function anthropic(): Anthropic {
 export class GenerationError extends Error {}
 
 type JsonCallOptions = {
+  model: string;
   system: string;
   prompt: string;
   schema: Record<string, unknown>;
@@ -27,6 +44,7 @@ type JsonCallOptions = {
  * Toujours exécuté côté serveur : la clé API n'atteint jamais le client.
  */
 export async function callClaudeJson<T>({
+  model,
   system,
   prompt,
   schema,
@@ -34,7 +52,7 @@ export async function callClaudeJson<T>({
   effort = "medium",
 }: JsonCallOptions): Promise<T> {
   const response = await anthropic().messages.create({
-    model: MODEL,
+    model,
     max_tokens: maxTokens,
     system,
     output_config: {
