@@ -108,9 +108,38 @@ export async function generatePostForPlatform(
 
   return {
     content: result.content.trim(),
-    hashtags: normalizeHashtags(result.hashtags),
+    hashtags: dropBrandLookalikes(normalizeHashtags(result.hashtags), brand.name),
     media_suggestion: result.media_suggestion.trim(),
   };
+}
+
+function letters(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/**
+ * Supprime les hashtags de marque fabriqués — « #borniaphoto » quand la marque
+ * s'appelle Bornia : ce hashtag n'existe pas et personne ne le suit. Le hashtag
+ * exact du nom de marque (« #bornia ») est conservé.
+ *
+ * Volontairement limité aux composés bâtis sur le nom exact. Un filtre flou
+ * attrapait aussi les variantes mal orthographiées, mais supprimait au passage
+ * « #borneaphoto » (borne à photo, vrai vocabulaire du métier) : effacer un bon
+ * hashtag en silence est plus gênant que d'en laisser passer un mauvais, que
+ * l'on voit et corrige dans le champ Hashtags.
+ */
+export function dropBrandLookalikes(
+  tags: string[],
+  brandName: string,
+): string[] {
+  const brand = letters(brandName);
+  if (brand.length < 4) return tags;
+
+  return tags.filter((tag) => {
+    const body = letters(tag);
+    if (body === brand) return true;
+    return !body.startsWith(brand);
+  });
 }
 
 export function normalizeHashtags(tags: string[] | null | undefined): string[] {
