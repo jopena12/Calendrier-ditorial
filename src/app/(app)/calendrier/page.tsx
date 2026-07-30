@@ -163,6 +163,9 @@ export default async function CalendarPage({
               </Link>
             ))}
           </div>
+          <Link href="/sujets/auto" className="btn-secondary">
+            Générer auto
+          </Link>
           <Link href="/sujets/nouveau" className="btn-primary">
             Nouveau sujet
           </Link>

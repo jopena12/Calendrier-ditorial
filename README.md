@@ -58,6 +58,7 @@ cp .env.example .env.local
 | `ANTHROPIC_API_KEY` | console.anthropic.com — **serveur uniquement** |
 | `ANTHROPIC_MODEL_POSTS` | *optionnel*, défaut `claude-sonnet-5` |
 | `ANTHROPIC_MODEL_ANALYSIS` | *optionnel*, défaut `claude-opus-5` |
+| `ANTHROPIC_MODEL_SUGGESTIONS` | *optionnel*, défaut `claude-opus-5` |
 
 ### 4. Lancer
 
@@ -86,7 +87,37 @@ npm run dev      # http://localhost:3000
 Le résultat alimente `brands.brand_profile` et `brands.editorial_guidelines`,
 socle de contexte permanent réutilisé pour tous les sujets de la marque.
 
-### Onboarding sujet + génération
+### Deux façons de générer
+
+**Mode automatique** (`/sujets/auto`) — pour quand on n'a pas d'idée. Claude lit
+la fiche de la marque, regarde ce qui a déjà été traité, et propose 3 à 10
+sujets : titre, angle, détails tirés de la fiche, objectif, et les réseaux où
+chacun fonctionne le mieux. Chaque proposition indique aussi ce qu'il manque
+(`needs_input`) plutôt que d'inventer un chiffre ou une date.
+
+On décoche ce qui ne va pas, on choisit une date de départ et un espacement
+(un sujet tous les N jours), et il rédige tous les posts — le calendrier se
+remplit d'un coup. La proposition ne coûte qu'un appel (~0,05 €) et
+n'enregistre rien : rien n'est écrit en base avant validation.
+
+Les sujets d'un même lot sont traités **séquentiellement**, pas en parallèle :
+chacun doit voir les précédents dans sa mémoire anti-doublons, sinon le lot se
+répète lui-même.
+
+**Mode manuel** (`/sujets/nouveau`) — quand on sait déjà quoi dire.
+
+### Mémoire anti-doublons
+
+À chaque génération, le prompt reçoit ce que la marque a déjà publié : les 20
+derniers sujets traités, et les 8 dernières accroches (premières lignes) des
+posts existants **sur la plateforme visée** — c'est là que la répétition se
+voit. Le modèle a pour consigne de ne réutiliser ni la formulation, ni la
+structure.
+
+En régénération, le post en cours est exclu de cette mémoire : sinon il
+s'interdirait sa propre accroche actuelle sans raison.
+
+### Onboarding sujet + génération manuelle
 
 `/sujets/nouveau` : marque, sujet en une phrase, angle, détails précis
 (chiffres, offre, date, lieu), objectif, date prévue, puis **cases à cocher des

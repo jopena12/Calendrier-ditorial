@@ -57,10 +57,48 @@ export function buildSystemPrompt(brand: Brand): string {
   return sections.filter(Boolean).join("\n\n");
 }
 
+/**
+ * Contexte anti-répétition : ce qui a déjà été écrit pour cette marque.
+ * `titles` = sujets déjà traités, `openings` = premières lignes des posts
+ * existants sur la même plateforme (c'est là que la répétition se voit).
+ */
+export type AvoidContext = {
+  titles: string[];
+  openings: string[];
+};
+
+function formatAvoid(avoid: AvoidContext | undefined): string | null {
+  if (!avoid) return null;
+  const blocks: string[] = [];
+
+  if (avoid.titles.length > 0) {
+    blocks.push(
+      `Sujets déjà traités pour cette marque :\n${avoid.titles
+        .map((title) => `- ${title}`)
+        .join("\n")}`,
+    );
+  }
+
+  if (avoid.openings.length > 0) {
+    blocks.push(
+      `Accroches déjà utilisées sur cette plateforme (n'en réutilise ni la formulation, ni la structure) :\n${avoid.openings
+        .map((opening) => `- « ${opening} »`)
+        .join("\n")}`,
+    );
+  }
+
+  if (blocks.length === 0) return null;
+
+  return `## À ne pas répéter\n\n${blocks.join(
+    "\n\n",
+  )}\n\nLe sujet ci-dessus peut recouper un sujet déjà traité : dans ce cas, traite-le sous un angle et avec une accroche franchement différents.`;
+}
+
 /** Prompt utilisateur : brief du sujet + format de la plateforme cible. */
 export function buildUserPrompt(
   topic: Pick<Topic, "title" | "angle" | "details" | "objective">,
   platform: Platform,
+  avoid?: AvoidContext,
 ): string {
   const meta = PLATFORM_META[platform];
 
@@ -75,15 +113,14 @@ export function buildUserPrompt(
     .filter(Boolean)
     .join("\n");
 
-  return `## Brief du sujet
-
-${brief}
-
-## Plateforme cible : ${meta.label}
-
-${meta.brief}
-
-Rédige maintenant le post ${meta.label} correspondant à ce brief, dans le ton de la marque.`;
+  return [
+    `## Brief du sujet\n\n${brief}`,
+    formatAvoid(avoid),
+    `## Plateforme cible : ${meta.label}\n\n${meta.brief}`,
+    `Rédige maintenant le post ${meta.label} correspondant à ce brief, dans le ton de la marque.`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /** Génère un post pour une plateforme donnée. */
@@ -92,10 +129,12 @@ export async function generatePostForPlatform(
   topic: Pick<Topic, "title" | "angle" | "details" | "objective">,
   platform: Platform,
   extraInstruction?: string,
+  avoid?: AvoidContext,
 ): Promise<GeneratedPost> {
+  const base = buildUserPrompt(topic, platform, avoid);
   const prompt = extraInstruction?.trim()
-    ? `${buildUserPrompt(topic, platform)}\n\n## Consigne supplémentaire pour cette regénération\n\n${extraInstruction.trim()}`
-    : buildUserPrompt(topic, platform);
+    ? `${base}\n\n## Consigne supplémentaire pour cette regénération\n\n${extraInstruction.trim()}`
+    : base;
 
   const result = await callClaudeJson<GeneratedPost>({
     model: MODELS.posts,
@@ -166,13 +205,20 @@ export async function generatePostsForTopic(
   brand: Brand,
   topic: Pick<Topic, "title" | "angle" | "details" | "objective">,
   platforms: Platform[],
+  avoidByPlatform?: Partial<Record<Platform, AvoidContext>>,
 ): Promise<{
   posts: Array<{ platform: Platform; post: GeneratedPost }>;
   failures: Array<{ platform: Platform; message: string }>;
 }> {
   const settled = await Promise.allSettled(
     platforms.map((platform) =>
-      generatePostForPlatform(brand, topic, platform).then((post) => ({
+      generatePostForPlatform(
+        brand,
+        topic,
+        platform,
+        undefined,
+        avoidByPlatform?.[platform],
+      ).then((post) => ({
         platform,
         post,
       })),

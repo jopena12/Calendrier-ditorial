@@ -47,7 +47,13 @@ export default async function NewTopicPage({
       <div>
         <h1 className="text-lg font-semibold text-slate-900">Nouveau sujet</h1>
         <p className="text-sm text-slate-500">
-          Un sujet = un brief, décliné en un post par réseau coché.
+          Un sujet = un brief, décliné en un post par réseau coché.{" "}
+          <Link
+            href="/sujets/auto"
+            className="text-indigo-600 hover:underline"
+          >
+            Pas d&apos;idée ? Laisse Claude proposer les sujets →
+          </Link>
         </p>
       </div>
 

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { generatePostForPlatform, normalizeHashtags } from "@/lib/generate";
+import { loadAvoidContext } from "@/lib/history";
 import { STATUSES } from "@/lib/platforms";
 import type { Brand, Platform, PostStatus, Topic } from "@/lib/types";
 
@@ -116,12 +117,19 @@ export async function regeneratePost(
 
   if (!brand || !topic) return { error: "Marque ou sujet introuvable." };
 
+  // La mémoire anti-doublons exclut le post en cours : sinon le modèle
+  // s'interdirait sa propre accroche actuelle sans raison.
+  const avoid = await loadAvoidContext(supabase, post.brand_id, [post.platform], {
+    excludePostId: post.id,
+  });
+
   try {
     const generated = await generatePostForPlatform(
       brand,
       topic,
       post.platform,
       instruction,
+      avoid[post.platform],
     );
 
     const { error: updateError } = await supabase

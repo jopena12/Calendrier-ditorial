@@ -17,6 +17,9 @@ import { anthropicApiKey } from "./env";
 export const MODELS = {
   posts: process.env.ANTHROPIC_MODEL_POSTS ?? "claude-sonnet-5",
   analysis: process.env.ANTHROPIC_MODEL_ANALYSIS ?? "claude-opus-5",
+  /** Proposition de sujets : un seul appel pour tout un lot, la qualité du
+   *  plan éditorial conditionne tous les posts qui en découlent. */
+  suggestions: process.env.ANTHROPIC_MODEL_SUGGESTIONS ?? "claude-opus-5",
 } as const;
 
 let client: Anthropic | null = null;
