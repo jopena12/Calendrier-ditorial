@@ -20,11 +20,16 @@ export default async function AppLayout({
             Calendrier Éditorial <span className="text-indigo-600">KMI</span>
           </Link>
           <Nav />
-          <form action={signOut} className="ml-auto">
-            <button type="submit" className="btn-ghost text-xs">
-              Déconnexion
-            </button>
-          </form>
+          <div className="ml-auto flex items-center gap-1">
+            <Link href="/compte" className="btn-ghost text-xs">
+              Compte
+            </Link>
+            <form action={signOut}>
+              <button type="submit" className="btn-ghost text-xs">
+                Déconnexion
+              </button>
+            </form>
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
