@@ -4,9 +4,11 @@ import { toISODate } from "@/lib/date";
 import { AutoPlanner } from "./auto-planner";
 import type { Brand } from "@/lib/types";
 
-// Proposition de sujets puis un appel Claude par réseau et par sujet retenu :
-// le lot complet peut prendre plusieurs minutes.
-export const maxDuration = 800;
+// Proposition de sujets puis un appel Claude par réseau et par sujet retenu.
+// 300 s est le plafond du plan Vercel Hobby ; au-delà, le déploiement est
+// refusé (errorCode invalid_max_duration). L'action de génération s'arrête
+// d'elle-même avant cette limite et rend compte des sujets non traités.
+export const maxDuration = 300;
 
 export default async function AutoTopicsPage({
   searchParams,

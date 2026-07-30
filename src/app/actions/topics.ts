@@ -202,9 +202,24 @@ export async function generateFromSuggestions(
   let created = 0;
   const failures: string[] = [];
 
+  // L'hébergeur coupe la requête à maxDuration (300 s sur Vercel Hobby). On
+  // s'arrête avant plutôt que de perdre le travail déjà fait dans un timeout :
+  // les sujets non traités sont signalés, il suffit de relancer.
+  const deadline = Date.now() + 240_000;
+
   // Séquentiel : chaque sujet doit voir les précédents dans sa mémoire
   // anti-doublons, sinon le lot se répète lui-même.
   for (const [index, suggestion] of suggestions.entries()) {
+    if (Date.now() > deadline) {
+      const remaining = suggestions.length - index;
+      failures.push(
+        `${remaining} sujet${remaining > 1 ? "s" : ""} non traité${
+          remaining > 1 ? "s" : ""
+        } : limite de temps de l'hébergeur atteinte. Relance une proposition pour les générer.`,
+      );
+      break;
+    }
+
     const platforms =
       overridePlatforms.length > 0
         ? overridePlatforms
