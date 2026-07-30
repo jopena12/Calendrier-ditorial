@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Calendrier Éditorial KMI">
+  <rect width="32" height="32" rx="7.5" fill="#18181b"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7" fill="none" stroke="#ffffff" stroke-opacity="0.12"/>
+  <rect x="8" y="5" width="16" height="3" rx="1.5" fill="#ffffff" fill-opacity="0.6"/>
+  <circle cx="11.3" cy="14.8" r="3.7" fill="#e11d48"/>
+  <circle cx="20.7" cy="14.8" r="3.7" fill="#0ea5e9"/>
+  <circle cx="11.3" cy="23.6" r="3.7" fill="#f59e0b"/>
+  <circle cx="20.7" cy="23.6" r="3.7" fill="#6366f1"/>
+</svg>
